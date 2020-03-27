@@ -1,0 +1,18 @@
+#!/bin/bash
+#  list all subscribers and its phone number
+
+TOPIC=/tmp/topics.list
+
+. $HOME/bin/SNS.env
+
+aws sns list-topics --output=text > $TOPIC
+cat $TOPIC | while read inrec
+do
+   TOPIC_ARN=`echo $inrec | awk '{print $2}'`
+   TOPIC_NAME=`echo $TOPIC_ARN | awk -F':' '{print $6}'`
+   echo -n "$TOPIC_NAME "
+   aws sns list-subscriptions-by-topic --topic-arn $TOPIC_ARN --query 'Subscriptions[].[Endpoint]' --output text
+done
+
+#  clean up
+rm $TOPIC
